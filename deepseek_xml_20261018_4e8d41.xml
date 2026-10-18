@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.webClip.managed</string>
+            <key>PayloadIdentifier</key>
+            <string>com.nsmod.panel.webclip</string>
+            <key>PayloadUUID</key>
+            <string>11111111-1111-1111-1111-111111111111</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>NSMOD Panel</string>
+            <key>Label</key>
+            <string>NSMOD Panel</string>
+            <key>URL</key>
+            <string>__URL_PANEL__</string>
+            <key>FullScreen</key>
+            <true/>
+            <key>IsRemovable</key>
+            <true/>
+            <key>Precomposed</key>
+            <true/>
+            <key>IgnoreManifestScope</key>
+            <true/>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>NSMOD Panel</string>
+    <key>PayloadIdentifier</key>
+    <string>com.nsmod.profile</string>
+    <key>PayloadUUID</key>
+    <string>22222222-2222-2222-2222-222222222222</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadOrganization</key>
+    <string>NSMOD</string>
+    <key>PayloadDescription</key>
+    <string>Web Clip full-screen NSMOD Panel</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+</dict>
+</plist>
