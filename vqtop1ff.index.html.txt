@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBERPUNK AIMLOCK PANEL v4 - NSMOD</title>
+<style>
+    /* ============================================================
+       BIẾN TOÀN CỤC - TÔNG MÀU CYBERPUNK
+       ============================================================ */
+    :root {
+        --nen-chinh: #000508;
+        --nen-phu: #021018;
+        --xanh-ngoc: #00ffc8;
+        --xanh-dam: #005f4a;
+        --do-neon: #ff0044;
+        --chu-chinh: #b8fff2;
+        --vang-neon: #ffe600;
+        --tim-neon: #b400ff;
+        --vien-sang: 0 0 6px #00ffc8, 0 0 14px rgba(0,255,200,0.5);
+        --vien-do: 0 0 6px #ff0044, 0 0 14px rgba(255,0,68,0.5);
+        --vien-tim: 0 0 6px #b400ff, 0 0 14px rgba(180,0,255,0.5);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        background: var(--nen-chinh);
+        color: var(--chu-chinh);
+        font-family: "Courier New", monospace;
+        overflow: hidden;
+    }
+
+    #matrix {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.22;
+        pointer-events: none;
+    }
+
+    .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        background: radial-gradient(circle at 50% 40%, rgba(0,255,200,0.06), transparent 60%),
+                    linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.85));
+        pointer-events: none;
+    }
+
+    /* ============================================================
+       KHUNG CHÍNH
+       ============================================================ */
+    .panel {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 14px;
+        overflow-y: auto;
+    }
+
+    .tieu-de {
+        width: 100%;
+        text-align: center;
+        padding: 10px 0 14px;
+        border-bottom: 1px solid var(--xanh-dam);
+        margin-bottom: 14px;
+        text-shadow: var(--vien-sang);
+        letter-spacing: 3px;
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--xanh-ngoc);
+    }
+
+    .tieu-de span {
+        display: block;
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: var(--chu-chinh);
+        opacity: 0.7;
+        margin-top: 4px;
+        text-shadow: none;
+    }
+
+    .status-bar {
+        width: 100%;
+        max-width: 760px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        padding: 6px 10px;
+        border: 1px solid var(--xanh-dam);
+        background: var(--nen-phu);
+        margin-bottom: 14px;
+        box-shadow: inset 0 0 8px rgba(0,255,200,0.15);
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .status-bar .blink {
+        color: var(--xanh-ngoc);
+        animation: nhap-nhay 1.1s infinite;
+    }
+
+    @keyframes nhap-nhay {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.25; }
+    }
+
+    /* ============================================================
+       PHẦN (SECTION)
+       ============================================================ */
+    .phan {
+        width: 100%;
+        max-width: 760px;
+        border: 1px solid var(--xanh-dam);
+        background: rgba(0,8,12,0.65);
+        box-shadow: inset 0 0 14px rgba(0,255,200,0.08),
+                    0 0 10px rgba(0,255,200,0.12);
+        margin-bottom: 16px;
+        padding: 12px;
+        position: relative;
+    }
+
+    .phan::before {
+        content: "";
+        position: absolute;
+        top: -1px; left: -1px;
+        width: 18px; height: 18px;
+        border-top: 2px solid var(--xanh-ngoc);
+        border-left: 2px solid var(--xanh-ngoc);
+    }
+
+    .phan::after {
+        content: "";
+        position: absolute;
+        bottom: -1px; right: -1px;
+        width: 18px; height: 18px;
+        border-bottom: 2px solid var(--xanh-ngoc);
+        border-right: 2px solid var(--xanh-ngoc);
+    }
+
+    .tieu-de-phan {
+        font-size: 12px;
+        letter-spacing: 3px;
+        color: var(--xanh-ngoc);
+        text-shadow: var(--vien-sang);
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed var(--xanh-dam);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tieu-de-phan small {
+        font-size: 9px;
+        color: var(--chu-chinh);
+        opacity: 0.6;
+        text-shadow: none;
+        letter-spacing: 1px;
+    }
+
+    /* ============================================================
+       LƯỚI NÚT
+       ============================================================ */
+    .luoi {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .nut {
+        position: relative;
+        padding: 14px 10px;
+        font-family: inherit;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--xanh-ngoc);
+        background: linear-gradient(180deg, rgba(0,255,200,0.05), rgba(0,0,0,0.4));
+        border: 1px solid var(--xanh-ngoc);
+        border-radius: 3px;
+        cursor: pointer;
+        box-shadow: var(--vien-sang), inset 0 0 8px rgba(0,255,200,0.08);
+        transition: all 0.18s ease;
+        text-shadow: 0 0 4px rgba(0,255,200,0.7);
+        user-select: none;
+        overflow: hidden;
+    }
+
+    .nut::before {
+        content: "";
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,255,200,0.18), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .nut:hover::before { left: 100%; }
+
+    .nut:hover {
+        background: linear-gradient(180deg, rgba(0,255,200,0.15), rgba(0,0,0,0.5));
+    }
+
+    .nut.on {
+        color: var(--do-neon);
+        border-color: var(--do-neon);
+        box-shadow: var(--vien-do), inset 0 0 10px rgba(255,0,68,0.15);
+        text-shadow: 0 0 5px rgba(255,0,68,0.9);
+        background: linear-gradient(180deg, rgba(255,0,68,0.1), rgba(0,0,0,0.5));
+    }
+
+    .nut .trang-thai {
+        display: block;
+        font-size: 9px;
+        margin-top: 5px;
+        letter-spacing: 2px;
+        opacity: 0.85;
+    }
+
+    /* ============================================================
+       NÚT LAUNCH GAME (FF THƯỜNG / FF MAX)
+       ============================================================ */
+    .launch-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .nut-launch {
+        position: relative;
+        padding: 22px 12px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .nut-launch small {
+        display: block;
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        margin-top: 6px;
+        opacity: 0.8;
+        font-weight: normal;
+    }
+
+    /* FF thường - xanh ngọc */
+    .nut-launch.ff-thuong {
+        color: var(--xanh-ngoc);
+        background: linear-gradient(180deg, rgba(0,255,200,0.12), rgba(0,0,0,0.6));
+        border: 2px solid var(--xanh-ngoc);
+        box-shadow: var(--vien-sang), inset 0 0 14px rgba(0,255,200,0.15);
+        text-shadow: 0 0 6px rgba(0,255,200,0.9);
+    }
+
+    .nut-launch.ff-thuong:hover {
+        background: linear-gradient(180deg, rgba(0,255,200,0.25), rgba(0,0,0,0.6));
+        box-shadow: 0 0 12px #00ffc8, 0 0 24px rgba(0,255,200,0.7), inset 0 0 18px rgba(0,255,200,0.25);
+    }
+
+    /* FF Max - tím neon */
+    .nut-launch.ff-max {
+        color: var(--tim-neon);
+        background: linear-gradient(180deg, rgba(180,0,255,0.12), rgba(0,0,0,0.6));
+        border: 2px solid var(--tim-neon);
+        box-shadow: var(--vien-tim), inset 0 0 14px rgba(180,0,255,0.15);
+        text-shadow: 0 0 6px rgba(180,0,255,0.9);
+    }
+
+    .nut-launch.ff-max:hover {
+        background: linear-gradient(180deg, rgba(180,0,255,0.25), rgba(0,0,0,0.6));
+        box-shadow: 0 0 12px #b400ff, 0 0 24px rgba(180,0,255,0.7), inset 0 0 18px rgba(180,0,255,0.25);
+    }
+
+    /* Hiệu ứng đang tải */
+    .nut-launch.dang-tai {
+        animation: xung-neon 0.6s infinite alternate;
+    }
+
+    @keyframes xung-neon {
+        from { filter: brightness(1); }
+        to   { filter: brightness(1.6); }
+    }
+
+    /* ============================================================
+       BIỂU ĐỒ
+       ============================================================ */
+    .bieu-do-wrap {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .chi-so-hang {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        margin-bottom: 2px;
+    }
+
+    .chi-so-hang .ten { color: var(--xanh-ngoc); }
+    .chi-so-hang .gia-tri { color: var(--chu-chinh); }
+
+    .khung-bieu-do {
+        position: relative;
+        width: 100%;
+        height: 60px;
+        border: 1px solid var(--xanh-dam);
+        background: rgba(0,10,15,0.7);
+        box-shadow: inset 0 0 10px rgba(0,255,200,0.08);
+    }
+
+    .khung-bieu-do canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    /* ============================================================
+       NHẬT KÝ
+       ============================================================ */
+    .nhat-ky {
+        width: 100%;
+        max-width: 760px;
+        border: 1px solid var(--xanh-dam);
+        background: rgba(0,10,15,0.85);
+        padding: 8px 10px;
+        font-size: 10px;
+        line-height: 1.6;
+        color: var(--chu-chinh);
+        box-shadow: inset 0 0 10px rgba(0,255,200,0.1);
+        margin-bottom: 12px;
+        max-height: 130px;
+        overflow-y: auto;
+    }
+
+    .nhat-ky .dong { opacity: 0.85; }
+    .nhat-ky .dong .gio { color: var(--xanh-ngoc); }
+    .nhat-ky .dong.on { color: var(--do-neon); }
+    .nhat-ky .dong.tim { color: var(--tim-neon); }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--xanh-dam); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+<div class="overlay"></div>
+
+<div class="panel">
+    <div class="tieu-de">
+        CYBERPUNK AIMLOCK PANEL
+        <span>FREE FIRE // NO ROOT // ANTICHEAT BYPASS // NSMOD ENGINE</span>
+    </div>
+
+    <div class="status-bar">
+        <span>TRUY CẬP VÀO FREE FIRE</span>
+        <span class="blink" id="statusText">● ĐANG KẾT NỐI...</span>
+    </div>
+
+    <!-- ============================================================
+         PHẦN LAUNCH GAME - FF THƯỜNG / FF MAX
+         ============================================================ -->
+    <div class="phan">
+        <div class="tieu-de-phan">
+            LAUNCH GAME
+            <small>CHỌN PHIÊN BẢN</small>
+        </div>
+        <div class="launch-wrap">
+            <button class="nut-launch ff-thuong" id="btnFFThuong">
+                VÀO FF THƯỜNG
+                <small>FREE FIRE</small>
+            </button>
+            <button class="nut-launch ff-max" id="btnFFMax">
+                VÀO FF MAX
+                <small>FREE FIRE MAX</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         BIỂU ĐỒ
+         ============================================================ -->
+    <div class="phan">
+        <div class="tieu-de-phan">
+            SYSTEM MONITOR
+            <small>FPS // RAM // CPU</small>
+        </div>
+        <div class="bieu-do-wrap">
+            <div>
+                <div class="chi-so-hang">
+                    <span class="ten">■ FPS</span>
+                    <span class="gia-tri" id="valFPS">0</span>
+                </div>
+                <div class="khung-bieu-do"><canvas id="chartFPS"></canvas></div>
+            </div>
+            <div>
+                <div class="chi-so-hang">
+                    <span class="ten">■ RAM (%)</span>
+                    <span class="gia-tri" id="valRAM">0</span>
+                </div>
+                <div class="khung-bieu-do"><canvas id="chartRAM"></canvas></div>
+            </div>
+            <div>
+                <div class="chi-so-hang">
+                    <span class="ten">■ CPU (%)</span>
+                    <span class="gia-tri" id="valCPU">0</span>
+                </div>
+                <div class="khung-bieu-do"><canvas id="chartCPU"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         PHẦN 120FPS
+         ============================================================ -->
+    <div class="phan">
+        <div class="tieu-de-phan">
+            120FPS ENGINE
+            <small>PERFORMANCE // SMOOTH</small>
+        </div>
+        <div class="luoi" id="luoiFPS"></div>
+    </div>
+
+    <!-- ============================================================
+         PHẦN CHỨC NĂNG
+         ============================================================ -->
+    <div class="phan">
+        <div class="tieu-de-phan">
+            CHỨC NĂNG AIMLOCK
+            <small>FEATURES // AIM ASSIST</small>
+        </div>
+        <div class="luoi" id="luoiChucNang"></div>
+    </div>
+
+    <div class="nhat-ky" id="nhatKy"></div>
+</div>
+
+<script>
+/* ============================================================
+   DANH SÁCH CHỨC NĂNG
+   ============================================================ */
+const DANH_SACH_FPS = [
+    "120FPS MODE",
+    "SMOOTH ENGINE",
+    "TANG DO MUOT MAY",
+    "KHONG GIAT TAM",
+    "FPS UNLOCK",
+    "FRAME BOOSTER"
+];
+
+const DANH_SACH_CHUC_NANG = [
+    "VUOT NHẸ TÂM",
+    "BÁM ĐẦU",
+    "AIMLOCK",
+    "STABILITY ASSIST",
+    "SCREEN BOOSTER",
+    "SENSITIVITY BOOSTER",
+    "AIM LOCKDOWN",
+    "AIM HOLD",
+    "HEADSHOT FIX",
+    "BULLET ALIGN",
+    "SHAKE FIX",
+    "ANTICHEAT",
+    "NO ROOT"
+];
+
+/* ============================================================
+   ÂM THANH CLICK
+   ============================================================ */
+let audioCtx = null;
+
+function khoiTaoAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+    }
+}
+
+function phatAmThanh(loai) {
+    try {
+        khoiTaoAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        let f1 = 440, f2 = 220;
+        if (loai === "bat") { f1 = 880; f2 = 1320; }
+        else if (loai === "tat") { f1 = 440; f2 = 220; }
+        else if (loai === "launch") { f1 = 300; f2 = 900; }
+        else if (loai === "launch-max") { f1 = 500; f2 = 1200; }
+
+        osc.type = "square";
+        osc.frequency.setValueAtTime(f1, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(f2, audioCtx.currentTime + 0.1);
+
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    } catch (e) {}
+}
+
+/* ============================================================
+   MA TRẬN NỀN
+   ============================================================ */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+let cot = 0;
+let hatMaTran = [];
+
+function khoiTaoMaTran() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const coChu = 14;
+    cot = Math.floor(canvas.width / coChu);
+    hatMaTran = [];
+    for (let i = 0; i < cot; i++) {
+        hatMaTran[i] = Math.random() * canvas.height;
+    }
+}
+
+function veMaTran() {
+    ctx.fillStyle = "rgba(0,5,8,0.08)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#00ffc8";
+    ctx.font = "14px monospace";
+    for (let i = 0; i < cot; i++) {
+        const kyTu = String.fromCharCode(0x30A0 + Math.random() * 96);
+        const x = i * 14;
+        const y = hatMaTran[i];
+        ctx.fillText(kyTu, x, y);
+        if (y > canvas.height && Math.random() > 0.975) hatMaTran[i] = 0;
+        else hatMaTran[i] += 14;
+    }
+}
+khoiTaoMaTran();
+setInterval(veMaTran, 55);
+window.addEventListener("resize", khoiTaoMaTran);
+
+/* ============================================================
+   NHẬT KÝ
+   ============================================================ */
+const nhatKy = document.getElementById("nhatKy");
+const statusText = document.getElementById("statusText");
+
+function ghiNhatKy(noiDung, loai) {
+    const dong = document.createElement("div");
+    let cls = "dong";
+    if (loai === "on") cls += " on";
+    else if (loai === "tim") cls += " tim";
+    dong.className = cls;
+    const gio = new Date().toLocaleTimeString("vi-VN", { hour12: false });
+    dong.innerHTML = `<span class="gio">[${gio}]</span> ${noiDung}`;
+    nhatKy.appendChild(dong);
+    nhatKy.scrollTop = nhatKy.scrollHeight;
+    while (nhatKy.children.length > 60) nhatKy.removeChild(nhatKy.firstChild);
+}
+
+/* ============================================================
+   TẠO NÚT TOGGLE
+   ============================================================ */
+function taoNut(container, ten, tienTo) {
+    const nut = document.createElement("button");
+    nut.className = "nut";
+    nut.dataset.trangThai = "off";
+    nut.innerHTML = `${ten}<span class="trang-thai">OFF</span>`;
+
+    nut.addEventListener("click", () => {
+        const dangBat = nut.dataset.trangThai === "on";
+        const moi = !dangBat;
+        nut.dataset.trangThai = moi ? "on" : "off";
+        nut.classList.toggle("on", moi);
+        nut.querySelector(".trang-thai").textContent = moi ? "ON" : "OFF";
+        phatAmThanh(moi ? "bat" : "tat");
+        ghiNhatKy(`[${tienTo}][${moi ? "BẬT" : "TẮT"}] ${ten}`, moi ? "on" : null);
+    });
+
+    container.appendChild(nut);
+}
+
+const luoiFPS = document.getElementById("luoiFPS");
+DANH_SACH_FPS.forEach(ten => taoNut(luoiFPS, ten, "FPS"));
+
+const luoiChucNang = document.getElementById("luoiChucNang");
+DANH_SACH_CHUC_NANG.forEach(ten => taoNut(luoiChucNang, ten, "FN"));
+
+/* ============================================================
+   NÚT LAUNCH GAME
+   ============================================================ */
+const btnFFThuong = document.getElementById("btnFFThuong");
+const btnFFMax = document.getElementById("btnFFMax");
+
+// Deep link scheme cho Free Fire
+const SCHEME_FF_THUONG = "freefire://";
+const SCHEME_FF_MAX = "freefiremax://";
+// Android intent scheme
+const INTENT_FF_THUONG = "intent://#Intent;package=com.dts.freefireth;end";
+const INTENT_FF_MAX = "intent://#Intent;package=com.dts.freefiremax;end";
+
+function kichHoatGame(nut, scheme, intent, tenGame, loaiAm) {
+    phatAmThanh(loaiAm);
+    nut.classList.add("dang-tai");
+    ghiNhatKy(`[LAUNCH] Đang khởi chạy ${tenGame}...`, loaiAm === "launch-max" ? "tim" : null);
+
+    // Thử deep link trước
+    let daMo = false;
+    const batDau = Date.now();
+
+    function thuMo(url) {
+        try {
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            setTimeout(() => {
+                if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+            }, 2000);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Thử scheme
+    thuMo(scheme);
+
+    // Fallback sang intent (Android)
+    setTimeout(() => {
+        if (document.hidden || document.visibilityState === "hidden") {
+            daMo = true;
+        }
+        if (!daMo) {
+            // Thử intent
+            window.location.href = intent;
+        }
+    }, 800);
+
+    // Kết thúc hiệu ứng sau 2.5 giây
+    setTimeout(() => {
+        nut.classList.remove("dang-tai");
+        ghiNhatKy(`[LAUNCH] ${tenGame}: gửi lệnh khởi chạy. Nếu không mở được, kiểm tra cài đặt.`, loaiAm === "launch-max" ? "tim" : null);
+    }, 2500);
+}
+
+btnFFThuong.addEventListener("click", () => {
+    kichHoatGame(btnFFThuong, SCHEME_FF_THUONG, INTENT_FF_THUONG, "Free Fire", "launch");
+});
+
+btnFFMax.addEventListener("click", () => {
+    kichHoatGame(btnFFMax, SCHEME_FF_MAX, INTENT_FF_MAX, "Free Fire Max", "launch-max");
+});
+
+/* ============================================================
+   BIỂU ĐỒ FPS/RAM/CPU
+   ============================================================ */
+const SO_DIEM = 60;
+
+function taoBieuDo(canvasId, mauSac, maxVal) {
+    const cv = document.getElementById(canvasId);
+    const c = cv.getContext("2d");
+    const duLieu = new Array(SO_DIEM).fill(0);
+
+    function capNhatKichThuoc() {
+        const rect = cv.parentElement.getBoundingClientRect();
+        cv.width = rect.width;
+        cv.height = rect.height;
+    }
+    capNhatKichThuoc();
+    window.addEventListener("resize", capNhatKichThuoc);
+
+    function ve() {
+        const w = cv.width;
+        const h = cv.height;
+        c.clearRect(0, 0, w, h);
+
+        c.strokeStyle = "rgba(0,255,200,0.08)";
+        c.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+            const y = (h / 4) * i;
+            c.beginPath();
+            c.moveTo(0, y);
+            c.lineTo(w, y);
+            c.stroke();
+        }
+
+        const buoc = w / (SO_DIEM - 1);
+        const giaTriMax = maxVal || Math.max(...duLieu, 1);
+
+        c.beginPath();
+        c.moveTo(0, h);
+        for (let i = 0; i < SO_DIEM; i++) {
+            const x = i * buoc;
+            const y = h - (duLieu[i] / giaTriMax) * (h - 4) - 2;
+            c.lineTo(x, y);
+        }
+        c.lineTo(w, h);
+        c.closePath();
+        c.fillStyle = mauSac.replace("1)", "0.12)").replace("rgb", "rgba");
+        c.fill();
+
+        c.beginPath();
+        for (let i = 0; i < SO_DIEM; i++) {
+            const x = i * buoc;
+            const y = h - (duLieu[i] / giaTriMax) * (h - 4) - 2;
+            if (i === 0) c.moveTo(x, y);
+            else c.lineTo(x, y);
+        }
+        c.strokeStyle = mauSac;
+        c.lineWidth = 1.5;
+        c.shadowColor = mauSac;
+        c.shadowBlur = 6;
+        c.stroke();
+        c.shadowBlur = 0;
+
+        const xCuoi = (SO_DIEM - 1) * buoc;
+        const yCuoi = h - (duLieu[SO_DIEM - 1] / giaTriMax) * (h - 4) - 2;
+        c.beginPath();
+        c.arc(xCuoi, yCuoi, 2.5, 0, Math.PI * 2);
+        c.fillStyle = mauSac;
+        c.shadowColor = mauSac;
+        c.shadowBlur = 10;
+        c.fill();
+        c.shadowBlur = 0;
+    }
+
+    function day(giaTri) {
+        duLieu.shift();
+        duLieu.push(giaTri);
+        ve();
+    }
+
+    return { day };
+}
+
+const chartFPS = taoBieuDo("chartFPS", "rgb(0,255,200)", 120);
+const chartRAM = taoBieuDo("chartRAM", "rgb(255,230,0)", 100);
+const chartCPU = taoBieuDo("chartCPU", "rgb(255,0,68)", 100);
+
+const valFPS = document.getElementById("valFPS");
+const valRAM = document.getElementById("valRAM");
+const valCPU = document.getElementById("valCPU");
+
+let fpsHienTai = 60;
+let ramHienTai = 45;
+let cpuHienTai = 30;
+
+setInterval(() => {
+    const daBat120 = document.querySelector('#luoiFPS .nut.on');
+    const mucTieuFPS = daBat120 ? 120 : 60;
+    fpsHienTai += (mucTieuFPS - fpsHienTai) * 0.15 + (Math.random() - 0.5) * 4;
+    fpsHienTai = Math.max(30, Math.min(120, fpsHienTai));
+
+    ramHienTai += (Math.random() - 0.5) * 6;
+    ramHienTai = Math.max(20, Math.min(95, ramHienTai));
+
+    cpuHienTai += (Math.random() - 0.5) * 8;
+    cpuHienTai = Math.max(10, Math.min(90, cpuHienTai));
+
+    const f = Math.round(fpsHienTai);
+    const r = Math.round(ramHienTai);
+    const cp = Math.round(cpuHienTai);
+
+    valFPS.textContent = f + " FPS";
+    valRAM.textContent = r + " %";
+    valCPU.textContent = cp + " %";
+
+    chartFPS.day(f);
+    chartRAM.day(r);
+    chartCPU.day(cp);
+}, 1000);
+
+/* ============================================================
+   TRẠNG THÁI KẾT NỐI
+   ============================================================ */
+let soLan = 0;
+const TRANG_THAI = [
+    "● ĐANG KẾT NỐI...",
+    "● ĐANG QUÉT TIẾN TRÌNH...",
+    "● ĐÃ KẾT NỐI FREE FIRE",
+    "● ANTICHEAT BYPASS OK",
+    "● NO ROOT ACTIVE"
+];
+
+const henGio = setInterval(() => {
+    statusText.textContent = TRANG_THAI[soLan % TRANG_THAI.length];
+    soLan++;
+    if (soLan >= TRANG_THAI.length) {
+        clearInterval(henGio);
+        statusText.textContent = "● SẴN SÀNG // 120FPS // NO ROOT // ANTICHEAT OK";
+        ghiNhatKy("Hệ thống kết nối Free Fire. 120FPS engine sẵn sàng.", null);
+    }
+}, 900);
+
+ghiNhatKy("Khởi tạo Cyberpunk Aimlock Panel v4 - NSMOD Engine.", null);
+ghiNhatKy("Launch module sẵn sàng: FF THƯỜNG / FF MAX.", null);
+</script>
+</body>
+</html>
